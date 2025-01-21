@@ -1,0 +1,25 @@
+<!-- public/illustration.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" width="500" height="400">
+  <style>
+    .text { font-family: Arial, sans-serif; font-weight: bold; }
+    .icon { fill: #3B82F6; }
+  </style>
+
+  <!-- Background -->
+  <rect width="500" height="400" fill="#F3F4F6" />
+
+  <!-- Ilustrasi Dokumen -->
+  <rect x="150" y="100" width="200" height="250" fill="#FFFFFF" stroke="#3B82F6" stroke-width="3" rx="10"/>
+  
+  <!-- Icon Dokumen -->
+  <path d="M220 130 L280 130 M220 160 L280 160 M220 190 L260 190" 
+        stroke="#3B82F6" stroke-width="3" fill="none"/>
+  
+  <!-- Grafik Mini -->
+  <polyline points="170,250 200,220 230,260 260,200 290,240" 
+             fill="none" stroke="#10B981" stroke-width="4"/>
+  
+  <!-- Elemen Tambahan -->
+  <circle cx="350" cy="200" r="40" fill="#60A5FA" fill-opacity="0.3"/>
+  <circle cx="150" cy="250" r="30" fill="#10B981" fill-opacity="0.3"/>
+</svg>
