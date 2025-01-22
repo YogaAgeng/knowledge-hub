@@ -1,4 +1,6 @@
 // models/User.js
+import mongoose from 'mongoose';
+
 const userSchema = new mongoose.Schema({
   nama: {
     type: String,
@@ -34,3 +36,5 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+export default mongoose.model('User', userSchema);
