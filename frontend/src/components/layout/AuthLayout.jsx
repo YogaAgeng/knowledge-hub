@@ -13,9 +13,11 @@ function AuthLayout() {
 
   return (
     <div>
-      <AuthNavbar />
-      <Outlet />
-    </div>
+            <AuthNavbar />
+            <div className="p-4">
+                <Outlet />
+            </div>
+        </div>
   );
 }
 export default AuthLayout;

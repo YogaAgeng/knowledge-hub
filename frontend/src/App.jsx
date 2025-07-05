@@ -1,17 +1,16 @@
 /* eslint-disable react/prop-types */
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import IntegrationPage from './pages/IntegrationPage';
 import DocumentsPage from './pages/DocumentsPage';
-import DocumentForm from './components/DocumentForm';
+import DocumentView from './pages/DocumentView';
+import AcceptInvitation from './pages/AcceptInvitation';
 import PublicLayout from './components/layout/PublicLayout';
-import AuthLayout from './components/layout/AuthLayout';
-
-// Komponen untuk route yang memerlukan autentikasi
-/* eslint-disable no-unused-vars */
+import ProtectedLayout from './components/layout/ProtectedLayout';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -21,51 +20,36 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <Router>
+      <Toaster position="top-right" />
       <Routes>
-        {/* Rute Publik */}
+        {/* Public Routes */}
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Route>
 
-        {/* Rute Terautentikasi */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <AuthLayout />
-            </ProtectedRoute>
-          }
-        >
-          {/* Rute dashboard */}
-          <Route index element={<Dashboard />} />
+        {/* Protected Routes */}
+        <Route element={
+          <ProtectedRoute>
+            <ProtectedLayout />
+          </ProtectedRoute>
+        }>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/documents/:id" element={<DocumentView />} />
+          <Route path="/integrations" element={<IntegrationPage />} />
         </Route>
 
-        {/* Rute Dokumen */}
-        <Route 
-          path="/documents" 
-          element={
-            <ProtectedRoute>
-              <AuthLayout />
-            </ProtectedRoute>
-          }
-        >
-          {/* Daftar dokumen */}
-          <Route index element={<DocumentsPage />} />
-          
-          {/* Formulir dokumen baru */}
-          <Route path="new" element={<DocumentForm />} />
-          
-          {/* Edit dokumen */}
-          <Route path="edit/:id" element={<DocumentForm />} />
-        </Route>
+        {/* Collaboration Route (Protected but standalone) */}
+        <Route path="/collaborate/accept/:token" element={
+          <ProtectedRoute>
+            <AcceptInvitation />
+          </ProtectedRoute>
+        } />
 
-        {/* Tangani rute yang tidak ditemukan */}
-        <Route 
-          path="*" 
-          element={<Navigate to="/dashboard" replace />} 
-        />
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
   );

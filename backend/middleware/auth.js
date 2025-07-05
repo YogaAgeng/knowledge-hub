@@ -1,50 +1,77 @@
 import jwt from 'jsonwebtoken';
-// import { AppError } from './errorHandler.js';
+import User from '../models/User.js';
 
-const authMiddleware = (req, res, next) => {
-  console.log('Full Headers:', req.headers);
-
-  const authHeader = req.header('Authorization');
-  console.log('Authorization Headers:', req.headers);
-  // Ambil token dari header
-
-  // Cek keberadaan token
-  if (!authHeader) {
-    return res.status(401).json({ 
-      msg: 'Tidak ada token, otorisasi ditolak' 
-    });
-  }
-
-  // if (!token) {
-  //   return res.status(401).json({ 
-  //     msg: 'Token tidak valid' 
-  //   });
-  // }
-
-  // if (!token) {
-  //   return next(new AppError('Tidak ada token, otorisasi ditolak', 401));
-  // }
-
-
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2 || parts[0] !== 'Bearer') {
-    return res.status(401).json({ 
-      msg: 'Format token salah' 
-    });
-  }
-
-  const token = parts[1];
-  console.log('Extracted Token:', token);
-
+export const protect = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Decoded Token:', decoded);
-    req.user = decoded.user;
-    next();
-  } catch (err) {
-    console.error('Token Verification Error:', err);
-    res.status(401).json({ msg: 'Token tidak valid' });
+    let token;
+
+    // Check for token in headers
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Akses ditolak, token tidak ditemukan'
+      });
+    }
+
+    try {
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Get user from token
+      const user = await User.findById(decoded.userId);
+      
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Token tidak valid, user tidak ditemukan'
+        });
+      }
+
+      if (!user.isActive) {
+        return res.status(401).json({
+          success: false,
+          message: 'Akun tidak aktif'
+        });
+      }
+
+      // Add user to request
+      req.user = {
+        id: user._id,
+        nama: user.nama,
+        email: user.email,
+        jurusan: user.jurusan,
+        role: user.role
+      };
+
+      next();
+    } catch (error) {
+      console.error('Token verification error:', error);
+      return res.status(401).json({
+        success: false,
+        message: 'Token tidak valid'
+      });
+    }
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
 };
 
-export default { authMiddleware };
+// Check if user is admin
+export const admin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({
+      success: false,
+      message: 'Akses ditolak, admin diperlukan'
+    });
+  }
+};

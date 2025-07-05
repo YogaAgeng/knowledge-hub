@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // src/pages/DocumentsPage.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,50 +8,57 @@ import DocumentForm from '../components/DocumentForm';
 
 function DocumentsPage() {
   const [documents, setDocuments] = useState([]);
-  const [setError] = useState('');
+  // const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const fetchDocuments = async () => {
+    setLoading(true);
+    try {
+      const data = await getDocuments();
+      setDocuments(data.data || data);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
+  
   useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const data = await getDocuments();
-        setDocuments(data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
     fetchDocuments();
   }, []);
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteDocument(id);
-      setDocuments(prev => prev.filter(doc => doc._id !== id));
-    } catch (err) {
-      setError(err.message);
-    }
+
+  const handleDocumentCreated = (newDocument) => {
+    setDocuments(prev => [newDocument, ...prev]);
+    setIsModalOpen(false);
   };
 
-  const handleEdit = (id) => {
-    navigate(`/document/edit/${id}`);
-  };
+  // const handleDelete = async (id) => {
+  //   try {
+  //     await deleteDocument(id);
+  //     setDocuments(prev => prev.filter(doc => doc._id !== id));
+  //   } catch (err) {
+  //     setError(err.message);
+  //   }
+  // };
 
-  if (loading) return <div>Memuat dokumen...</div>;
+  // const handleEdit = (id) => {
+  //   navigate(`/document/edit/${id}`);
+  // };
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  // // if (loading) return <div>Memuat dokumen...</div>;
+
+  // const openModal = () => setIsModalOpen(true);
+  // const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Daftar Dokumen</h1>
-        <button 
-          onClick={openModal}
+        <button
+          onClick={() => setIsModalOpen(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           + Tambah Dokumen
@@ -61,34 +69,28 @@ function DocumentsPage() {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
-            <button 
-              onClick={closeModal}
+            <button
+              onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
             >
               ✕
             </button>
-            <DocumentForm 
-              onClose={closeModal} 
-              onDocumentCreated={(newDocument) => {
-                setDocuments(prev => [newDocument, ...prev]);
-                closeModal();
-              }}
+            <DocumentForm
+              onDocumentCreated={handleDocumentCreated}
             />
+
           </div>
         </div>
       )}
 
-      {/* Existing document list rendering */}
-      {documents.length === 0 ? (
-        <div className="text-center text-gray-500">
-          Belum ada dokumen. Silakan buat dokumen baru.
-        </div>
+      {loading ? (
+        <div>Memuat dokumen...</div>
+      // : documents.length === 0 ? (
+      //   <div className="text-center text-gray-500">
+      //     Belum ada dokumen. Silakan buat dokumen baru.
+      //   </div>
       ) : (
-        <DocumentList 
-          documents={documents} 
-          onDelete={handleDelete}
-          onEdit={handleEdit}
-        />
+        <DocumentList documents={documents} />
       )}
     </div>
   );

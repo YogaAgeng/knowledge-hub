@@ -1,13 +1,10 @@
 import { Outlet } from 'react-router-dom';
-import PublicNavbar from './PublicNavbar';
-
-function PublicLayout() {
+const PublicLayout = () => {
   return (
-    <div>
-      <PublicNavbar />
+    <div className="min-h-screen bg-gray-50">
       <Outlet />
     </div>
   );
-}
+};
 
 export default PublicLayout;
